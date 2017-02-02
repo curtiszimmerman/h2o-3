@@ -16,6 +16,7 @@ import water.fvec.Frame;
 import water.persist.Persist;
 import water.util.FileUtils;
 import water.util.JCodeGen;
+import water.util.PojoUtils;
 
 public class ModelsHandler<I extends ModelsHandler.Models, S extends SchemaV3<I,S>>
     extends Handler {
@@ -232,6 +233,11 @@ public class ModelsHandler<I extends ModelsHandler.Models, S extends SchemaV3<I,
       Persist p = H2O.getPM().getPersistForURI(targetUri);
       OutputStream os = p.create(targetUri.toString(),mexport.force);
       model.writeAll(new AutoBuffer(os,true)).close();
+      //Output model parameters to JSON
+      OutputStream os2 = p.create(targetUri.toString() + ".json",mexport.force);
+      os2.write(model.writeJSON(new AutoBuffer()).buf());
+      OutputStream os3 = p.create(targetUri.toString() + ".parms.json",mexport.force);
+      os3.write(model._parms.writeJSON(new AutoBuffer()).buf());
       // Send back
       mexport.dir = "file".equals(targetUri.getScheme()) ? new File(targetUri).getCanonicalPath() : targetUri.toString();
     } catch (IOException e) {
@@ -248,6 +254,11 @@ public class ModelsHandler<I extends ModelsHandler.Models, S extends SchemaV3<I,
       OutputStream os = p.create(targetUri.toString(),mexport.force);
       ModelMojoWriter mojo = model.getMojo();
       mojo.writeTo(os);
+      //Output model parameters to JSON
+      OutputStream os2 = p.create(targetUri.toString() + ".json",mexport.force);
+      os2.write(model.writeJSON(new AutoBuffer()).buf());
+      OutputStream os3 = p.create(targetUri.toString() + ".parms.json",mexport.force);
+      os3.write(model._parms.writeJSON(new AutoBuffer()).buf());
       // Send back
       mexport.dir = "file".equals(targetUri.getScheme()) ? new File(targetUri).getCanonicalPath() : targetUri.toString();
     } catch (IOException e) {
